@@ -1,0 +1,53 @@
+{
+  "Actions": [
+    {
+      "Icon": "Images/icon",
+      "Name": "Advanced Launcher",
+      "States": [
+        {
+          "Image": "Images/launcherAction",
+          "TitleAlignment": "middle",
+          "FontSize": "18"
+        }
+      ],
+      "SupportedInMultiActions": true,
+      "Tooltip": "Advanced Launcher",
+      "UUID": "com.barraider.advancedlauncher",
+      "PropertyInspectorPath": "PropertyInspector/Launcher.html"
+    },
+    {
+      "Icon": "Images/icon",
+      "Name": "Process Killer",
+      "States": [
+        {
+          "Image": "Images/launcherAction",
+          "TitleAlignment": "middle",
+          "FontSize": "18"
+        }
+      ],
+      "SupportedInMultiActions": true,
+      "Tooltip": "Advanced Launcher",
+      "UUID": "com.barraider.advancedlauncher.processkiller",
+      "PropertyInspectorPath": "PropertyInspector/ProcessKiller.html"
+    }
+  ],
+  "Author": "BarRaider",
+  "Description": "Smart application launcher for the Stream Deck with a bunch of customizable options",
+  "Name": "Advanced Launcher",
+  "Icon": "Images/pluginIcon",
+  "URL": "https://barraider.github.io/",
+  "Version": "0.2",
+  "CodePath": "com.barraider.advancedlauncher",
+  "Category": "Advanced Launcher [BarRaider]",
+  "CategoryIcon": "Images/categoryIcon",
+  "OS": [
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "SDKVersion": 2,
+  "Software": {
+    "MinimumVersion": "4.3"
+  }
+}
