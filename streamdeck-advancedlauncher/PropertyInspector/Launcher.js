@@ -21,10 +21,20 @@
 
 function showHideSettings(payload) {
     console.log("Show Hide Settings Called");
+    setLimitInstances("none");
     setPostKillDelay("none");
+    if (payload['limitInstances']) {
+        setLimitInstances("");
+    }
+
     if (payload['killInstances']) {
         setPostKillDelay("");
     }
+}
+
+function setLimitInstances(displayValue) {
+    var dvMaxInstances = document.getElementById('dvMaxInstances');
+    dvMaxInstances.style.display = displayValue;
 }
 
 function setPostKillDelay(displayValue) {
