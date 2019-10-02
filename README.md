@@ -1,7 +1,7 @@
 # Advanced Launcher
  Smart application launcher for the Elgato Stream Deck
 
- **Author's website and contact information:** [https://barraider.com](https://barraider.com)
+**Author's website and contact information:** [https://barraider.com](https://barraider.com)
 
 ## Current Features
 - `Limit number of instances running` feature. Set limit to 1 to ensure you don't launch the app if it's already running.

@@ -8,6 +8,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AdvancedLauncher
@@ -21,7 +22,8 @@ namespace AdvancedLauncher
     [PluginActionId("com.barraider.advancedlauncher")]
     public class LauncherAction : PluginBase
     {
-        private const string MAX_INSTANCES = "1";
+        private const int MAX_INSTANCES = 1;
+        private const int POST_KILL_LAUNCH_DELAY = 0;
         private class PluginSettings
         {
             
@@ -32,8 +34,9 @@ namespace AdvancedLauncher
                     Application = String.Empty,
                     AppArguments = String.Empty,
                     LimitInstances = false,
-                    MaxInstances = MAX_INSTANCES,
-                    KillInstances = false
+                    MaxInstances = MAX_INSTANCES.ToString(),
+                    KillInstances = false,
+                    PostKillLaunchDelay = POST_KILL_LAUNCH_DELAY.ToString()
                 };
                 return instance;
             }
@@ -53,6 +56,9 @@ namespace AdvancedLauncher
 
             [JsonProperty(PropertyName = "killInstances")]
             public bool KillInstances { get; set; }
+
+            [JsonProperty(PropertyName = "postKillLaunchDelay")]
+            public string PostKillLaunchDelay { get; set; }
         }
 
         #region Private Members
@@ -61,6 +67,7 @@ namespace AdvancedLauncher
         private int maxInstances = 1;
         private Icon fileIcon;
         private Bitmap fileImage;
+        private int postKillLaunchDelay = 0;
 
         #endregion
         public LauncherAction(SDConnection connection, InitialPayload payload) : base(connection, payload)
@@ -122,7 +129,12 @@ namespace AdvancedLauncher
 
             if (!Int32.TryParse(settings.MaxInstances, out maxInstances))
             {
-                settings.MaxInstances = MAX_INSTANCES;
+                settings.MaxInstances = MAX_INSTANCES.ToString();
+            }
+
+            if (!Int32.TryParse(settings.PostKillLaunchDelay, out postKillLaunchDelay))
+            {
+                settings.PostKillLaunchDelay = POST_KILL_LAUNCH_DELAY.ToString();
             }
 
             // Cleanup
@@ -178,6 +190,11 @@ namespace AdvancedLauncher
                         Logger.Instance.LogMessage(TracingLevel.INFO, $"Killing process: {p.ProcessName} PID: {p.Id}");
                         p.Kill();
                     });
+
+                    if (postKillLaunchDelay > 0)
+                    {
+                        Thread.Sleep(postKillLaunchDelay * 1000);
+                    }
                 }
 
                 // Do not spwan a new process if there are already too many running

@@ -21,24 +21,13 @@
 
 function showHideSettings(payload) {
     console.log("Show Hide Settings Called");
-    setInstances("none");
-    if (payload['limitInstances']) {
-        setInstances("");
-    }
-
-    if (payload['streamathonMode']) {
-        setStreamathon("");
+    setPostKillDelay("none");
+    if (payload['killInstances']) {
+        setPostKillDelay("");
     }
 }
 
-function setInstances(displayValue) {
-    var dvMaxInstances = document.getElementById('dvMaxInstances');
-    dvMaxInstances.style.display = displayValue;
-}
-
-function setStreamathon(displayValue) {
-    var dvStreamathonIncrement = document.getElementById('dvStreamathonIncrement');
-    var dvStreamathonMessage = document.getElementById('dvStreamathonMessage');
-    dvStreamathonIncrement.style.display = displayValue;
-    dvStreamathonMessage.style.display = displayValue;
+function setPostKillDelay(displayValue) {
+    var dvPostKillLaunchDelay = document.getElementById('dvPostKillLaunchDelay');
+    dvPostKillLaunchDelay.style.display = displayValue;
 }
