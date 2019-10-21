@@ -33,6 +33,7 @@ namespace AdvancedLauncher
                 {
                     Application = String.Empty,
                     AppArguments = String.Empty,
+                    AppStartIn = String.Empty,
                     LimitInstances = false,
                     MaxInstances = MAX_INSTANCES.ToString(),
                     KillInstances = false,
@@ -44,6 +45,9 @@ namespace AdvancedLauncher
             [FilenameProperty]
             [JsonProperty(PropertyName = "application")]
             public string Application { get; set; }
+
+            [JsonProperty(PropertyName = "appStartIn")]
+            public string AppStartIn { get; set; }
 
             [JsonProperty(PropertyName = "appArguments")]
             public string AppArguments { get; set; }
@@ -106,7 +110,12 @@ namespace AdvancedLauncher
 
         public override void ReceivedSettings(ReceivedSettingsPayload payload)
         {
+            string appOld = settings.Application;
             Tools.AutoPopulateSettings(settings, payload.Settings);
+            if (appOld != settings.Application) // Application has changed
+            {
+                InitializeStartInDirectory();
+            }
             InitializeSettings();
             SaveSettings();
         }
@@ -118,6 +127,16 @@ namespace AdvancedLauncher
         private Task SaveSettings()
         {
             return Connection.SetSettingsAsync(JObject.FromObject(settings));
+        }
+
+        private void InitializeStartInDirectory()
+        {
+            if (!File.Exists(settings.Application))
+            {
+                return;
+            }
+            FileInfo fileInfo = new FileInfo(settings.Application);
+            settings.AppStartIn = fileInfo.Directory.FullName;
         }
 
         private void InitializeSettings()
@@ -226,6 +245,12 @@ namespace AdvancedLauncher
             if (!String.IsNullOrEmpty(settings.AppArguments))
             {
                 start.Arguments = settings.AppArguments;
+            }
+
+            // Enter Working (Start In) Directory
+            if (Directory.Exists(settings.AppStartIn))
+            {
+                start.WorkingDirectory = settings.AppStartIn;
             }
             // Enter the executable to run, including the complete path
             start.FileName = settings.Application;
