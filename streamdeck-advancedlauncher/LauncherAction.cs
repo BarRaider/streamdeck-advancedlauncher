@@ -37,7 +37,8 @@ namespace AdvancedLauncher
                     LimitInstances = false,
                     MaxInstances = MAX_INSTANCES.ToString(),
                     KillInstances = false,
-                    PostKillLaunchDelay = POST_KILL_LAUNCH_DELAY.ToString()
+                    PostKillLaunchDelay = POST_KILL_LAUNCH_DELAY.ToString(),
+                    RunAsAdmin = false
                 };
                 return instance;
             }
@@ -63,6 +64,11 @@ namespace AdvancedLauncher
 
             [JsonProperty(PropertyName = "postKillLaunchDelay")]
             public string PostKillLaunchDelay { get; set; }
+
+            [JsonProperty(PropertyName = "runAsAdmin")]
+            public bool RunAsAdmin { get; set; }
+
+            
         }
 
         #region Private Members
@@ -257,6 +263,11 @@ namespace AdvancedLauncher
             // Do you want to show a console window?
             //start.WindowStyle = ProcessWindowStyle.Hidden;
             //start.CreateNoWindow = true;
+
+            if (settings.RunAsAdmin)
+            {
+                start.Verb = "runas";
+            }
 
             // Launch the app
             Process.Start(start);

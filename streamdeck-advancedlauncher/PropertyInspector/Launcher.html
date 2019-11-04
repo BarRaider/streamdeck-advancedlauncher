@@ -28,6 +28,13 @@
             <div class="sdpi-item-label">Arguments</div>
             <input class="sdpi-item-value sdProperty" placeholder="-settings -whatever" value="" id="appArguments" oninput="setSettings()">
         </div>
+        <div type="checkbox" class="sdpi-item" id="dvAdmin">
+            <div class="sdpi-item-label">Admin</div>
+            <div class="sdpi-item-value">
+                <input id="runAsAdmin" type="checkbox" value="" class="sdProperty sdCheckbox" oninput="setSettings()">
+                <label for="runAsAdmin" class="sdpi-item-label"><span></span>Run as Administrator</label>
+            </div>
+        </div>
         <div type="checkbox" class="sdpi-item" id="dvLimitMultipleInstances">
             <div class="sdpi-item-label">Instances</div>
             <div class="sdpi-item-value">

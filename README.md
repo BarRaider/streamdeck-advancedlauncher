@@ -4,6 +4,8 @@
 **Author's website and contact information:** [https://barraider.com](https://barraider.com)
 
 ## Current Features
+- New `Start In` parameter, allows you to modify the working directory in which the application runs. 
+- Programs can now be set to `Run as Administrator`
 - `Limit number of instances running` feature. Set limit to 1 to ensure you don't launch the app if it's already running.
 - `Kill all existing instances` ensures only the freshly launched instance is running.
 - Customize the arguments to pass to launched application
