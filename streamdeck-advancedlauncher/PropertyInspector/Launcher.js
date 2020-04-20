@@ -33,8 +33,8 @@ function showHideSettings(payload) {
 }
 
 function setLimitInstances(displayValue) {
-    var dvMaxInstances = document.getElementById('dvMaxInstances');
-    dvMaxInstances.style.display = displayValue;
+    var dvLimitInstancesSettings = document.getElementById('dvLimitInstancesSettings');
+    dvLimitInstancesSettings.style.display = displayValue;
 }
 
 function setPostKillDelay(displayValue) {

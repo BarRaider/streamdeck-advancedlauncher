@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ namespace AdvancedLauncher
     //---------------------------------------------------
     //          BarRaider's Hall Of Fame
     // Subscriber: Pingu2k5
+    // Subscriber: Chefmans
     //---------------------------------------------------
 
     [PluginActionId("com.barraider.advancedlauncher")]
@@ -38,7 +40,9 @@ namespace AdvancedLauncher
                     MaxInstances = MAX_INSTANCES.ToString(),
                     KillInstances = false,
                     PostKillLaunchDelay = POST_KILL_LAUNCH_DELAY.ToString(),
-                    RunAsAdmin = false
+                    RunAsAdmin = false,
+                    ShowRunningIndicator = false,
+                    BringToFront = false
                 };
                 return instance;
             }
@@ -68,14 +72,17 @@ namespace AdvancedLauncher
             [JsonProperty(PropertyName = "runAsAdmin")]
             public bool RunAsAdmin { get; set; }
 
-            
+            [JsonProperty(PropertyName = "showRunningIndicator")]
+            public bool ShowRunningIndicator { get; set; }
+
+            [JsonProperty(PropertyName = "bringToFront")]
+            public bool BringToFront { get; set; }
         }
 
         #region Private Members
 
         private readonly PluginSettings settings;
         private int maxInstances = 1;
-        private Icon fileIcon;
         private Bitmap fileImage;
         private int postKillLaunchDelay = 0;
 
@@ -111,10 +118,11 @@ namespace AdvancedLauncher
             if (fileImage != null)
             {
                 await Connection.SetImageAsync(fileImage);
+                await HandleRunningIndicator();
             }
         }
 
-        public override void ReceivedSettings(ReceivedSettingsPayload payload)
+        public async override void ReceivedSettings(ReceivedSettingsPayload payload)
         {
             string appOld = settings.Application;
             Tools.AutoPopulateSettings(settings, payload.Settings);
@@ -123,7 +131,8 @@ namespace AdvancedLauncher
                 InitializeStartInDirectory();
             }
             InitializeSettings();
-            SaveSettings();
+            await Connection.SetTitleAsync((String)null);
+            await SaveSettings();
         }
 
         public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload) { }
@@ -162,29 +171,7 @@ namespace AdvancedLauncher
                 settings.PostKillLaunchDelay = POST_KILL_LAUNCH_DELAY.ToString();
             }
 
-            // Cleanup
-            if (fileIcon != null)
-            {
-                fileIcon.Dispose();
-                fileIcon = null;
-            }
-            if (fileImage != null)
-            {
-                fileImage.Dispose();
-                fileImage = null;
-            }
-
-            // Try to extract Icon
-            if (!String.IsNullOrEmpty(settings.Application) && File.Exists(settings.Application))
-            {
-                FileInfo fileInfo = new FileInfo(settings.Application);
-                fileIcon = IconExtraction.Shell.OfPath(fileInfo.FullName, small: false);
-                if (fileIcon != null)
-                {
-                    // Get a bitmap image of the icon
-                    fileImage = fileIcon.ToBitmap();
-                }
-            }
+            FetchFileImage();
         }
 
         private async Task HandleApplicationRun()
@@ -222,13 +209,16 @@ namespace AdvancedLauncher
                     }
                 }
 
-                // Do not spwan a new process if there are already too many running
+                // Do not spawn a new process if there are already too many running
                 if (settings.LimitInstances)
                 {
                     int count = Process.GetProcessesByName(fileName).ToList().Count;
                     if (count >= maxInstances)
                     {
                         Logger.Instance.LogMessage(TracingLevel.INFO, $"Not spawning a new instance of {settings.Application} because there are {count}/{maxInstances} running.");
+
+                        // Check if we should bring the existing process to front
+                        HandleBringToFront(fileName);
                         return;
                     }
                 }
@@ -272,6 +262,110 @@ namespace AdvancedLauncher
             // Launch the app
             Process.Start(start);
         }
+
+        private async Task HandleRunningIndicator()
+        {
+            if (!settings.ShowRunningIndicator)
+            {
+                return;
+            }
+
+            FileInfo fileInfo = new FileInfo(settings.Application);
+            string fileName = fileInfo.Name.Substring(0, fileInfo.Name.LastIndexOf('.'));
+
+            // Check if there are any running instances
+            if (Process.GetProcessesByName(fileName).Length > 0)
+            {
+                await Connection.SetTitleAsync($"🟢{new String(' ',10)}");
+            }
+            else
+            {
+                await Connection.SetTitleAsync((String)null);
+            }
+        }
+
+        private void FetchFileImage()
+        {
+            if (fileImage != null)
+            {
+                fileImage.Dispose();
+                fileImage = null;
+            }
+
+            // Try to extract Icon
+            if (!String.IsNullOrEmpty(settings.Application) && File.Exists(settings.Application))
+            {
+                FileInfo fileInfo = new FileInfo(settings.Application);
+                var fileIcon = IconExtraction.Shell.OfPath(fileInfo.FullName, small: false);
+                if (fileIcon != null)
+                {
+                    using (Bitmap fileIconAsBitmap = fileIcon.ToBitmap())
+                    {
+                        Logger.Instance.LogMessage(TracingLevel.INFO, $"Bitmap size is: {fileIconAsBitmap.Width}x{fileIconAsBitmap.Height}");
+                        fileImage = Tools.GenerateGenericKeyImage(out Graphics graphics);
+
+                        // Check if app icon is smaller than the Stream Deck key
+                        if (fileIconAsBitmap.Width < fileImage.Width && fileIconAsBitmap.Height < fileImage.Height)
+                        {
+                            float position = Math.Min(fileIconAsBitmap.Width / 2, fileIconAsBitmap.Height / 2);
+                            graphics.DrawImage(fileIconAsBitmap, position, position, fileImage.Width - position * 2, fileImage.Height - position * 2);
+                        }
+                        else // App icon is bigger or equals to the size of a stream deck key
+                        {
+                            graphics.DrawImage(fileIconAsBitmap, 0, 0, fileImage.Width, fileImage.Height);
+                        }
+                        graphics.Dispose();
+                    }
+                    fileIcon.Dispose();
+                }
+            }
+        }
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool IsIconic(IntPtr hWnd);
+
+        private void HandleBringToFront(string processFileName)
+        {
+            if (!settings.BringToFront)
+            {
+                return;
+            }
+
+            var proc = Process.GetProcessesByName(processFileName).Where(p => !String.IsNullOrEmpty(p.MainWindowTitle)).OrderByDescending(p => p.Id).FirstOrDefault();
+            if (proc == null)
+            {
+                Logger.Instance.LogMessage(TracingLevel.ERROR, $"HandleBringToFront error, could not find process for {processFileName}");
+                return;
+            }
+
+            IntPtr handle = proc.MainWindowHandle;
+            if (SetForegroundWindow(handle))
+            {
+                if (!IsIconic(handle))
+                {
+                    Logger.Instance.LogMessage(TracingLevel.INFO, $"Successfully set foreground window for {processFileName} HWND: {handle}");
+                    return;
+                }
+            }
+            Logger.Instance.LogMessage(TracingLevel.WARN, $"Failed to set foreground window for {processFileName} HWND: {handle}, trying to force it");
+            MinimizeAndRestoreWindow(handle);
+
+        }
+
+        [DllImport("user32.dll")]
+        public static extern bool ShowWindow(IntPtr hWnd, ShowWindowEnum nCmdShow);
+
+        private void MinimizeAndRestoreWindow(IntPtr hWnd)
+        {
+            ShowWindow(hWnd, ShowWindowEnum.MINIMIZE);
+            ShowWindow(hWnd, ShowWindowEnum.RESTORE);
+        }
+
 
         #endregion
     }

@@ -42,9 +42,19 @@
                 <label for="limitInstances" class="sdpi-item-label"><span></span>Limit number of instances running</label>
             </div>
         </div>
-        <div class="sdpi-item" id="dvMaxInstances">
-            <div class="sdpi-item-label">Max Instances</div>
-            <input class="sdpi-item-value sdProperty" id="maxInstances" inputmode="numeric" pattern="[0-9]*" type="number" placeholder="1" oninput="setSettings()">
+        <div id="dvLimitInstancesSettings" style="display:none;">
+            <div class="sdpi-item" id="dvMaxInstances">
+                <div class="sdpi-item-label">Max Instances</div>
+                <input class="sdpi-item-value sdProperty" id="maxInstances" inputmode="numeric" pattern="[0-9]*" type="number" placeholder="1" oninput="setSettings()">
+            </div>
+
+            <div type="checkbox" class="sdpi-item" id="dvBringToFront">
+                <div class="sdpi-item-label">Bring to front</div>
+                <div class="sdpi-item-value">
+                    <input id="bringToFront" type="checkbox" value="" class="sdProperty sdCheckbox" oninput="setSettings()">
+                    <label for="bringToFront" class="sdpi-item-label"><span></span>Bring to front if already running</label>
+                </div>
+            </div>
         </div>
         <div type="checkbox" class="sdpi-item" id="dvKillExistingInstances">
             <div class="sdpi-item-label">Kill Instances</div>
@@ -56,6 +66,13 @@
         <div class="sdpi-item" id="dvPostKillLaunchDelay">
             <div class="sdpi-item-label">Delay before launch (seconds)</div>
             <input class="sdpi-item-value sdProperty" id="postKillLaunchDelay" inputmode="numeric" pattern="[0-9]*" type="number" placeholder="0" oninput="setSettings()">
+        </div>
+        <div type="checkbox" class="sdpi-item" id="dvIndicator">
+            <div class="sdpi-item-label">Indicator</div>
+            <div class="sdpi-item-value">
+                <input id="showRunningIndicator" type="checkbox" value="" class="sdProperty sdCheckbox" oninput="setSettings()">
+                <label for="showRunningIndicator" class="sdpi-item-label"><span></span>Show dot if process is running</label>
+            </div>
         </div>
     </div>
 </body>

@@ -42,7 +42,7 @@
       <HintPath>..\..\..\DotNet\StreamDeck\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
-      <HintPath>..\..\..\DotNet\StreamDeck\packages\NLog.4.6.8\lib\net45\NLog.dll</HintPath>
+      <HintPath>..\..\..\DotNet\StreamDeck\packages\NLog.4.7.0\lib\net45\NLog.dll</HintPath>
     </Reference>
     <Reference Include="streamdeck-client-csharp, Version=4.1.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\streamdeck-client-csharp.4.1.1\lib\netstandard2.0\streamdeck-client-csharp.dll</HintPath>
@@ -75,6 +75,7 @@
     <Compile Include="LauncherAction.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ShowWindowEnum.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

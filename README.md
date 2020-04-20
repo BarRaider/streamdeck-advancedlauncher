@@ -3,6 +3,11 @@
 
 **Author's website and contact information:** [https://barraider.com](https://barraider.com)
 
+### New in v1.3
+- New `Bring To Front` feature allows you to bring an app to front if it's already running (no longer need to use Windows Mover & Resizer). To enable, make sure `Max Instances` is enabled.
+- Shows an :green_circle:  indicator if the app is already running
+- Improved icon scaling when Advanced Launcher fetched the icon from the application being launched.
+
 ## Current Features
 - New `Start In` parameter, allows you to modify the working directory in which the application runs. 
 - Programs can now be set to `Run as Administrator`

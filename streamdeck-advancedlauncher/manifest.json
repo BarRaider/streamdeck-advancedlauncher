@@ -6,8 +6,8 @@
       "States": [
         {
           "Image": "Images/launcherAction",
-          "TitleAlignment": "middle",
-          "FontSize": "18"
+          "TitleAlignment": "bottom",
+          "FontSize": "10"
         }
       ],
       "SupportedInMultiActions": true,
@@ -36,7 +36,7 @@
   "Name": "Advanced Launcher",
   "Icon": "Images/pluginIcon",
   "URL": "https://BarRaider.com/",
-  "Version": "1.2",
+  "Version": "1.3",
   "CodePath": "com.barraider.advancedlauncher",
   "Category": "Advanced Launcher [BarRaider]",
   "CategoryIcon": "Images/categoryIcon",
@@ -48,6 +48,6 @@
   ],
   "SDKVersion": 2,
   "Software": {
-    "MinimumVersion": "4.3"
+    "MinimumVersion": "4.6.1"
   }
 }
