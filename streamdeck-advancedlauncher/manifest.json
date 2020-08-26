@@ -29,25 +29,40 @@
       "Tooltip": "Advanced Launcher",
       "UUID": "com.barraider.advancedlauncher.processkiller",
       "PropertyInspectorPath": "PropertyInspector/ProcessKiller.html"
+    },
+    {
+      "Icon": "Images/steamIcon",
+      "Name": "Steam Game Launcher",
+      "States": [
+        {
+          "Image": "Images/steamAction",
+          "TitleAlignment": "bottom",
+          "FontSize": "10"
+        }
+      ],
+      "SupportedInMultiActions": true,
+      "Tooltip": "Launch Steam Games",
+      "UUID": "com.barraider.steamlauncher",
+      "PropertyInspectorPath": "PropertyInspector/SteamLauncher.html"
     }
   ],
   "Author": "BarRaider",
-  "Description": "Smart application launcher for the Stream Deck with a bunch of customizable options",
+  "Description": "Smart application launcher for the Stream Deck with a bunch of customizable options.\n* NEW: Steam Launcher shows and runs all your installed Steam games!",
   "Name": "Advanced Launcher",
   "Icon": "Images/pluginIcon",
   "URL": "https://BarRaider.com/",
-  "Version": "1.3",
+  "Version": "1.4",
   "CodePath": "com.barraider.advancedlauncher",
   "Category": "Advanced Launcher [BarRaider]",
   "CategoryIcon": "Images/categoryIcon",
   "OS": [
-    {
+    { 
       "Platform": "windows",
       "MinimumVersion": "10"
     }
   ],
   "SDKVersion": 2,
   "Software": {
-    "MinimumVersion": "4.6.1"
+    "MinimumVersion": "4.8"
   }
 }

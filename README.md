@@ -3,6 +3,11 @@
 
 **Author's website and contact information:** [https://barraider.com](https://barraider.com)
 
+### New in v1.4
+- **STEAM SUPPORT**: New `Steam Game Launcher` action shows you a list of all Steam games installed and let's you launch them from the Stream Deck
+- Improved initial image rendering times
+- "Windows Shield" icon is added to image on key when `Run as Administrator` is enabled
+
 ### New in v1.3
 - New `Bring To Front` feature allows you to bring an app to front if it's already running (no longer need to use Windows Mover & Resizer). To enable, make sure `Max Instances` is enabled.
 - Shows an :green_circle:  indicator if the app is already running

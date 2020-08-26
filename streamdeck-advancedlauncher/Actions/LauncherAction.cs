@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AdvancedLauncher
+namespace AdvancedLauncher.Actions
 {
 
     //---------------------------------------------------
@@ -80,11 +80,13 @@ namespace AdvancedLauncher
         }
 
         #region Private Members
+        private const string ADMIN_IMAGE_FILE = @"images\shield.png";
 
         private readonly PluginSettings settings;
         private int maxInstances = 1;
         private Bitmap fileImage;
         private int postKillLaunchDelay = 0;
+        private Image prefetchedAdminImage = null;
 
         #endregion
         public LauncherAction(SDConnection connection, InitialPayload payload) : base(connection, payload)
@@ -92,12 +94,14 @@ namespace AdvancedLauncher
             if (payload.Settings == null || payload.Settings.Count == 0)
             {
                 this.settings = PluginSettings.CreateDefaultSettings();
+                SaveSettings();
             }
             else
             {
                 this.settings = payload.Settings.ToObject<PluginSettings>();
             }
             InitializeSettings();
+            OnTick();
         }
 
         public override void Dispose()
@@ -314,6 +318,17 @@ namespace AdvancedLauncher
                         {
                             graphics.DrawImage(fileIconAsBitmap, 0, 0, fileImage.Width, fileImage.Height);
                         }
+
+                        // Add shield image
+                        if (settings.RunAsAdmin)
+                        {
+                            var adminImage = GetAdminImage();
+                            if (adminImage != null)
+                            {
+                                graphics.DrawImage(adminImage, fileImage.Width - adminImage.Width, fileImage.Height - adminImage.Height, adminImage.Width, adminImage.Height);
+                            }
+                        }
+
                         graphics.Dispose();
                     }
                     fileIcon.Dispose();
@@ -364,6 +379,19 @@ namespace AdvancedLauncher
         {
             ShowWindow(hWnd, ShowWindowEnum.MINIMIZE);
             ShowWindow(hWnd, ShowWindowEnum.RESTORE);
+        }
+
+        private Image GetAdminImage()
+        {
+            if (prefetchedAdminImage == null)
+            {
+                if (File.Exists(ADMIN_IMAGE_FILE))
+                {
+                    prefetchedAdminImage = Image.FromFile(ADMIN_IMAGE_FILE);
+                }
+            }
+
+            return prefetchedAdminImage;
         }
 
 

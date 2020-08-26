@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AdvancedLauncher
+namespace AdvancedLauncher.Actions
 {
     [PluginActionId("com.barraider.advancedlauncher.processkiller")]
     public class ProcessKillerAction : PluginBase
@@ -44,12 +44,14 @@ namespace AdvancedLauncher
             if (payload.Settings == null || payload.Settings.Count == 0)
             {
                 this.settings = PluginSettings.CreateDefaultSettings();
+                SaveSettings();
             }
             else
             {
                 this.settings = payload.Settings.ToObject<PluginSettings>();
             }
             InitializeSettings();
+            OnTick();
         }
 
         public override void Dispose()
