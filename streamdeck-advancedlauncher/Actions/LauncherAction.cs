@@ -42,7 +42,8 @@ namespace AdvancedLauncher.Actions
                     PostKillLaunchDelay = POST_KILL_LAUNCH_DELAY.ToString(),
                     RunAsAdmin = false,
                     ShowRunningIndicator = false,
-                    BringToFront = false
+                    BringToFront = false,
+                    WaitForExit = false
                 };
                 return instance;
             }
@@ -77,6 +78,9 @@ namespace AdvancedLauncher.Actions
 
             [JsonProperty(PropertyName = "bringToFront")]
             public bool BringToFront { get; set; }
+
+            [JsonProperty(PropertyName = "waitForExit")]
+            public bool WaitForExit { get; internal set; }
         }
 
         #region Private Members
@@ -264,7 +268,13 @@ namespace AdvancedLauncher.Actions
             }
 
             // Launch the app
-            Process.Start(start);
+            var process = new Process { StartInfo = start }; 
+            process.Start();
+            if (settings.WaitForExit)
+            {
+                process.WaitForExit();
+                process.Close();
+            }
         }
 
         private async Task HandleRunningIndicator()
