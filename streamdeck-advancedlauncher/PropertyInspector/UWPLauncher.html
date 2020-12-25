@@ -8,28 +8,24 @@
     <title>Advanced Launcher Settings</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/barraider/streamdeck-easypi@latest/src/sdpi.css">
     <script src="https://cdn.jsdelivr.net/gh/barraider/streamdeck-easypi@latest/src/sdtools.common.js"></script>
+    <script src="UWPLauncher.js"></script>
 </head>
 <body>
     <div class="sdpi-wrapper">
         <div class="sdpi-item" id="dvSteamApp">
-            <div class="sdpi-item-label">Steam App</div>
-            <select class="sdpi-item-value select sdProperty sdList" id="applications" oninput="setSettings()" sdListTextProperty="name" sdListValueProperty="id" sdValueField="applicationId"></select>
+            <div class="sdpi-item-label">App Name</div>
+            <select class="sdpi-item-value select sdProperty sdList" id="applications" oninput="setSettings()" sdListTextProperty="name" sdListValueProperty="name" sdValueField="applicationId"></select>
+        </div>
+        <div class="sdpi-item" id="dvReset">
+            <div class="sdpi-item-label empty"></div>
+            <button class="sdpi-item-value" onclick="refreshApps()">Reload Apps</button>
         </div>
         <div type="checkbox" class="sdpi-item" id="dvTitle">
             <div class="sdpi-item-label">Name</div>
             <div class="sdpi-item-value">
                 <input id="showAppName" type="checkbox" value="" class="sdProperty sdCheckbox" oninput="setSettings()">
-                <label for="showAppName" class="sdpi-item-label"><span></span>Show game name on key</label>
+                <label for="showAppName" class="sdpi-item-label"><span></span>Show app name on key</label>
             </div>
-        </div>
-        <div class="sdpi-item" id="dvImageFit">
-            <div class="sdpi-item-label">Image Fit</div>
-            <select class="sdpi-item-value select sdProperty" id="imageFit" oninput="setSettings()" value="0">
-                <option value="0">Fit</option>
-                <option value="1">Center</option>
-                <option value="2">Crop Left</option>
-                <option value="3">Crop Right</option>
-            </select>
         </div>
     </div>
 </body>

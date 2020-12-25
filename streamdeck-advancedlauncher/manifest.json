@@ -16,6 +16,21 @@
       "PropertyInspectorPath": "PropertyInspector/Launcher.html"
     },
     {
+      "Icon": "Images/msstoreIcon",
+      "Name": "MS Store (UWP) Launcher",
+      "States": [
+        {
+          "Image": "Images/msstoreAction",
+          "TitleAlignment": "bottom",
+          "FontSize": "10"
+        }
+      ],
+      "SupportedInMultiActions": true,
+      "Tooltip": "Launch Microsoft Store Apps",
+      "UUID": "com.barraider.msstorelauncher",
+      "PropertyInspectorPath": "PropertyInspector/UWPLauncher.html"
+    },
+    {
       "Icon": "Images/icon",
       "Name": "Process Killer",
       "States": [
@@ -47,22 +62,22 @@
     }
   ],
   "Author": "BarRaider",
-  "Description": "Smart application launcher for the Stream Deck with a bunch of customizable options.\n* NEW: Steam Launcher shows and runs all your installed Steam games!",
+  "Description": "Smart application launcher for the Stream Deck with a bunch of customizable options.\nNEW: Built-In support for Microsoft Store Apps (UWP). Steam Launcher shows and runs all your installed Steam games",
   "Name": "Advanced Launcher",
   "Icon": "Images/pluginIcon",
   "URL": "https://BarRaider.com/",
-  "Version": "1.4",
+  "Version": "1.5",
   "CodePath": "com.barraider.advancedlauncher",
   "Category": "Advanced Launcher [BarRaider]",
   "CategoryIcon": "Images/categoryIcon",
   "OS": [
-    { 
+    {
       "Platform": "windows",
       "MinimumVersion": "10"
     }
   ],
   "SDKVersion": 2,
   "Software": {
-    "MinimumVersion": "4.8"
+    "MinimumVersion": "4.9"
   }
 }

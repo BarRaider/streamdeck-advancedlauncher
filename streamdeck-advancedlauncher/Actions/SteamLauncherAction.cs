@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -21,6 +22,15 @@ namespace AdvancedLauncher.Actions
     [PluginActionId("com.barraider.steamlauncher")]
     public class SteamLauncherAction : PluginBase
     {
+
+        public enum ImageFit
+        {
+            Fit = 0,
+            Center = 1,
+            CropLeft = 2,
+            CropRight = 3
+
+        }
         private class PluginSettings
         {
 
@@ -30,7 +40,8 @@ namespace AdvancedLauncher.Actions
                 {
                     ApplicationId = String.Empty,
                     Applications = null,
-                    ShowAppName = false
+                    ShowAppName = false,
+                    ImageFit = ImageFit.Fit
                 };
                 return instance;
             }
@@ -43,6 +54,9 @@ namespace AdvancedLauncher.Actions
 
             [JsonProperty(PropertyName = "showAppName")]
             public bool ShowAppName { get; set; }
+
+            [JsonProperty(PropertyName = "imageFit")]
+            public ImageFit ImageFit { get; set; }
         }
 
         #region Private Members
@@ -105,7 +119,7 @@ namespace AdvancedLauncher.Actions
                 await Connection.SetImageAsync(appImage);
             }
 
-            if (appInfo != null && settings.ShowAppName)
+            if (appInfo != null && titleParameters != null && settings.ShowAppName)
             {
                 await Connection.SetTitleAsync(Tools.SplitStringToFit(appInfo.Name, titleParameters));
             }
@@ -136,10 +150,6 @@ namespace AdvancedLauncher.Actions
 
             SaveSettings();
         }
-
-        #endregion
-
-        #region Private Methods
 
         private void Connection_OnPropertyInspectorDidAppear(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.PropertyInspectorDidAppear> e)
         {
@@ -178,7 +188,9 @@ namespace AdvancedLauncher.Actions
                         if (data != null)
                         {
                             appInfo = data.ToObject<SteamAppInfo>();
-                            appImage = FetchImage(appInfo.ImageURL);
+                            //appImage = FetchImage(appInfo.ImageURL);
+                            using Bitmap img = FetchImage(appInfo.ImageURL);
+                            appImage = SetImageFit(img);
                         }
                     }
                     else
@@ -196,7 +208,7 @@ namespace AdvancedLauncher.Actions
 
         private List<String> LoadAdditionalLibraryFolders(string steamAppsFolder)
         {
-            var  directories = new List<String>
+            var directories = new List<String>
             {
                 steamAppsFolder
             };
@@ -213,11 +225,11 @@ namespace AdvancedLauncher.Actions
             {
                 string currLine = line.Replace('\t', ',').Replace("\"", "").Trim();
                 string[] variables = currLine.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                if (variables.Length == 2 &&  Int32.TryParse(variables[0], out _) && Directory.Exists(variables[1]))
+                if (variables.Length == 2 && Int32.TryParse(variables[0], out _) && Directory.Exists(variables[1]))
                 {
                     directories.Add(Path.Combine(variables[1], STEAM_APPS_DIR));
                 }
-             }
+            }
 
             return directories;
         }
@@ -310,6 +322,107 @@ namespace AdvancedLauncher.Actions
             return null;
         }
 
-        #endregion
+        private Bitmap SetImageFit(Bitmap img)
+        {
+            if (img == null)
+            {
+                return null;
+            }
+
+            Image tmpImage;
+            var newImage = Tools.GenerateGenericKeyImage(out Graphics graphics);
+            if (img.Width > img.Height)
+            {
+                tmpImage = (Bitmap)ResizeImageByHeight(img, newImage.Height);
+            }
+            else
+            {
+                tmpImage = (Bitmap)ResizeImageByWidth(img, newImage.Width);
+            }
+
+            
+            int startX;
+            switch (settings.ImageFit)
+            {
+                case ImageFit.CropLeft:
+                    graphics.DrawImage(tmpImage, new Rectangle(0, 0, newImage.Width, newImage.Height), new Rectangle(0, 0, newImage.Height, newImage.Width), GraphicsUnit.Pixel);
+                    break;
+                case ImageFit.CropRight:
+                    startX = tmpImage.Width - newImage.Width;
+                    if (startX < 0)
+                    {
+                        startX = 0;
+                    }
+                    graphics.DrawImage(tmpImage, new Rectangle(0, 0, newImage.Width, newImage.Height), new Rectangle(startX, 0, newImage.Width, newImage.Height), GraphicsUnit.Pixel);
+                    break;
+                case ImageFit.Center:
+                    startX = (tmpImage.Width /2) - (newImage.Width / 2);
+                    if (startX < 0)
+                    {
+                        startX = 0;
+                    }
+                    graphics.DrawImage(tmpImage, new Rectangle(0, 0, newImage.Width, newImage.Height), new Rectangle(startX, 0, newImage.Width, newImage.Height), GraphicsUnit.Pixel);
+                    break;
+                case ImageFit.Fit:
+                    graphics.DrawImage(img, new Rectangle(0,0, newImage.Width, newImage.Height));
+                    break;
+                default:
+                    Logger.Instance.LogMessage(TracingLevel.ERROR, $"SetImageFit unsupported ImageFit {settings.ImageFit}");
+                    return null;
+            }
+            tmpImage.Dispose();
+            return newImage;
+        }
+
+       private Image ResizeImageByHeight(Image img, int newHeight)
+        {
+            if (img == null)
+            {
+                return null;
+            }
+
+            int originalWidth = img.Width;
+            int originalHeight = img.Height;
+
+            // Figure out the ratio
+            double ratio = (double)newHeight / (double)originalHeight;
+            int newWidth = (int) (originalWidth *  ratio);
+            return ResizeImage(img, newHeight, newWidth);
+        }
+
+        private Image ResizeImageByWidth(Image img, int newWidth)
+        {
+            if (img == null)
+            {
+                return null;
+            }
+
+            int originalWidth = img.Width;
+            int originalHeight = img.Height;
+
+            // Figure out the ratio
+            double ratio = (double)newWidth / (double)originalWidth;
+            int newHeight = (int)(originalHeight * ratio);
+            return ResizeImage(img, newHeight, newWidth);
+        }
+
+        private Image ResizeImage(Image original, int newHeight, int newWidth)
+        {
+            Image canvas = new Bitmap(newWidth, newHeight);
+            Graphics graphic = Graphics.FromImage(canvas);
+
+            graphic.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            graphic.SmoothingMode = SmoothingMode.HighQuality;
+            graphic.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            graphic.CompositingQuality = CompositingQuality.HighQuality;
+
+            graphic.Clear(Color.Black); // Padding
+            graphic.DrawImage(original, 0, 0, newWidth, newHeight);
+
+            return canvas;
+        }
+
     }
+
+    #endregion
 }
