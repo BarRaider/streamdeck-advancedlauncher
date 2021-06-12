@@ -112,9 +112,14 @@ namespace AdvancedLauncher.Actions
             }
         }
 
-        public override void ReceivedSettings(ReceivedSettingsPayload payload)
+        public async override void ReceivedSettings(ReceivedSettingsPayload payload)
         {
+            bool showName = settings.ShowAppName;
             Tools.AutoPopulateSettings(settings, payload.Settings);
+            if (showName != settings.ShowAppName && !settings.ShowAppName)
+            {
+                await Connection.SetTitleAsync(null);
+            }
             InitializeSettings();
         }
 

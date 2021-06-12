@@ -55,6 +55,7 @@ namespace AdvancedLauncher.Backend
                 return apps;
             }
 
+            apps = new List<UWPPackageInfo>();
             Windows.Management.Deployment.PackageManager packageManager = new Windows.Management.Deployment.PackageManager();
             IEnumerable<Windows.ApplicationModel.Package> packages = (IEnumerable<Windows.ApplicationModel.Package>)packageManager.FindPackagesForUser("");
 
