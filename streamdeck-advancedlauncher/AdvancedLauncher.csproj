@@ -41,6 +41,9 @@
     <Reference Include="CommandLine, Version=2.8.0.0, Culture=neutral, PublicKeyToken=5a870481e358d379, processorArchitecture=MSIL">
       <HintPath>..\..\..\DotNet\StreamDeck\packages\CommandLineParser.2.8.0\lib\net461\CommandLine.dll</HintPath>
     </Reference>
+    <Reference Include="Gameloop.Vdf, Version=0.6.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\..\DotNet\StreamDeck\packages\Gameloop.Vdf.0.6.1\lib\net45\Gameloop.Vdf.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\..\DotNet\StreamDeck\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
