@@ -1,6 +1,8 @@
 ﻿using AdvancedLauncher.Backend;
 using BarRaider.SdTools;
 using BarRaider.SdTools.Wrappers;
+using Gameloop.Vdf.Linq;
+using Gameloop.Vdf;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -216,22 +218,75 @@ namespace AdvancedLauncher.Actions
             string libraryFile = Path.Combine(steamAppsFolder, STEAM_LIBRARY_FILE);
             if (!File.Exists(libraryFile))
             {
-                Logger.Instance.LogMessage(TracingLevel.WARN, $"File not found {libraryFile}");
+                Logger.Instance.LogMessage(TracingLevel.WARN, $"LoadAdditionalLibraryFolders: File not found {libraryFile}");
                 return directories;
             }
 
-            var foldersLines = File.ReadAllLines(libraryFile);
-            foreach (var line in foldersLines)
+            ParseVDFLibraries(libraryFile, ref directories);
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{this.GetType()} LoadAdditionalLibraryFolders found {directories.Count - 1} potential additional library folders");
+            return directories;
+        }
+
+        private void ParseVDFLibraries(string libraryFile, ref List<string> directories)
+        {
+            try
             {
-                string currLine = line.Replace('\t', ',').Replace("\"", "").Trim();
-                string[] variables = currLine.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                if (variables.Length == 2 && Int32.TryParse(variables[0], out _) && Directory.Exists(variables[1]))
+                VProperty library = VdfConvert.Deserialize(File.ReadAllText(libraryFile));
+                foreach (var child in library?.Value?.Children())
                 {
-                    directories.Add(Path.Combine(variables[1], STEAM_APPS_DIR));
+                    VProperty prop = child as VProperty;
+                    if (prop == null)
+                    {
+                        Logger.Instance.LogMessage(TracingLevel.WARN, $"{this.GetType()} ParseVDFLibraries failed to convert entity to VProperty: {child}");
+                        continue;
+                    }
+
+                    // Folders have a numeric value
+                    if (!Int32.TryParse(prop.Key, out _))
+                    {
+                        continue;
+                    }
+
+                    string path = string.Empty;
+                    if (prop.Value.Type == VTokenType.Value)
+                    {
+                        path = prop.Value?.ToString();
+                        if (String.IsNullOrEmpty(path) || !Directory.Exists(path))
+                        {
+                            Logger.Instance.LogMessage(TracingLevel.WARN, $"{this.GetType()} ParseVDFLibraries (Old Format) failed to locate path: {prop}");
+                            continue;
+                        }
+                    }
+                    else if (prop.Value.Type == VTokenType.Object)
+                    {
+
+                        path = prop.Value?["path"]?.ToString();
+                        if (string.IsNullOrEmpty(path))
+                        {
+                            Logger.Instance.LogMessage(TracingLevel.WARN, $"{this.GetType()} ParseVDFLibraries failed to locate path: {prop}");
+                            continue;
+                        }
+
+                        string mounted = prop.Value?["mounted"]?.ToString() ?? "1";
+                        if (mounted != "1")
+                        {
+                            Logger.Instance.LogMessage(TracingLevel.WARN, $"{this.GetType()} ParseVDFLibraries skipping unmounted folder: {path}");
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        Logger.Instance.LogMessage(TracingLevel.WARN, $"{this.GetType()} ParseVDFLibraries invalid property type: {prop.Value.Type} for {prop}");
+                        continue;
+                    }
+                    
+                    directories.Add(Path.Combine(path, STEAM_APPS_DIR));
                 }
             }
-
-            return directories;
+            catch (Exception ex)
+            {
+                Logger.Instance.LogMessage(TracingLevel.ERROR, $"{this.GetType()} ParseVDFLibraries Exception: {ex}");
+            }
         }
 
         private void LoadInstalledApps()
@@ -293,7 +348,9 @@ namespace AdvancedLauncher.Actions
                     }
                 }
             }
-            settings.Applications = settings.Applications.OrderBy(a => a.Name).ToList();
+            var apps = settings.Applications.OrderBy(a => a.Name).ToList();
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{this.GetType()} Found {apps.Count} apps in {directories.Count} dirs");
+            settings.Applications = apps;
         }
 
         private String GetSteamInstallDir()
