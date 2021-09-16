@@ -3,10 +3,8 @@
 
 **Author's website and contact information:** [https://barraider.com](https://barraider.com)
 
-### New in v1.5
-- Built-In support for **Microsoft Store Apps (UWP)**!!! :tada: 
-- Steam Launcher now allows different ways to resize the game logo
-- Improved load speeds
+### New in v1.7
+- Updated Steam Game Launcher to work with new Steam file formats
 
 ## Current Features
 - New `Start In` parameter, allows you to modify the working directory in which the application runs. 

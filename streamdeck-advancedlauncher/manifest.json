@@ -62,11 +62,11 @@
     }
   ],
   "Author": "BarRaider",
-  "Description": "Smart application launcher for the Stream Deck with a bunch of customizable options.\nNEW: Built-In support for Microsoft Store Apps (UWP). Steam Launcher shows and runs all your installed Steam games",
+  "Description": "Smart application launcher with a bunch of customizable options.\nNEW: Built-In support for Microsoft Store Apps (UWP). Steam Launcher shows and runs all your installed Steam games",
   "Name": "Advanced Launcher",
   "Icon": "Images/pluginIcon",
   "URL": "https://BarRaider.com/",
-  "Version": "1.6.1",
+  "Version": "1.7",
   "CodePath": "com.barraider.advancedlauncher",
   "Category": "Advanced Launcher [BarRaider]",
   "CategoryIcon": "Images/categoryIcon",
