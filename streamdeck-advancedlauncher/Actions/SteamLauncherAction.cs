@@ -260,14 +260,15 @@ namespace AdvancedLauncher.Actions
                     else if (prop.Value.Type == VTokenType.Object)
                     {
 
-                        path = prop.Value?["path"].ToString();
+                        path = prop.Value?["path"]?.ToString();
                         if (string.IsNullOrEmpty(path))
                         {
                             Logger.Instance.LogMessage(TracingLevel.WARN, $"{this.GetType()} ParseVDFLibraries failed to locate path: {prop}");
                             continue;
                         }
 
-                        if (prop.Value?["mounted"].ToString() != "1")
+                        string mounted = prop.Value?["mounted"]?.ToString() ?? "1";
+                        if (mounted != "1")
                         {
                             Logger.Instance.LogMessage(TracingLevel.WARN, $"{this.GetType()} ParseVDFLibraries skipping unmounted folder: {path}");
                             continue;
