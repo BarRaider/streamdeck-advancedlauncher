@@ -42,7 +42,8 @@ namespace AdvancedLauncher.Actions
                     PostKillLaunchDelay = POST_KILL_LAUNCH_DELAY.ToString(),
                     RunAsAdmin = false,
                     ShowRunningIndicator = false,
-                    BringToFront = false
+                    BringToFront = false,
+                    RunInBackground = false
                 };
                 return instance;
             }
@@ -77,6 +78,9 @@ namespace AdvancedLauncher.Actions
 
             [JsonProperty(PropertyName = "bringToFront")]
             public bool BringToFront { get; set; }
+
+            [JsonProperty(PropertyName = "runInBackground")]
+            public bool RunInBackground { get; set; }
         }
 
         #region Private Members
@@ -254,9 +258,11 @@ namespace AdvancedLauncher.Actions
             }
             // Enter the executable to run, including the complete path
             start.FileName = settings.Application;
-            // Do you want to show a console window?
-            //start.WindowStyle = ProcessWindowStyle.Hidden;
-            //start.CreateNoWindow = true;
+
+            if (settings.RunInBackground)
+            {
+                start.WindowStyle = ProcessWindowStyle.Hidden;
+            }
 
             if (settings.RunAsAdmin)
             {

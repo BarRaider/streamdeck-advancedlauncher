@@ -3,8 +3,8 @@
 
 **Author's website and contact information:** [https://barraider.com](https://barraider.com)
 
-### New in v1.7
-- Updated Steam Game Launcher to work with new Steam file formats
+### New in v1.8
+- Added the ability to launch applications in the background
 
 ## Current Features
 - New `Start In` parameter, allows you to modify the working directory in which the application runs. 
@@ -13,6 +13,7 @@
 - `Kill all existing instances` ensures only the freshly launched instance is running.
 - Customize the arguments to pass to launched application
 - `Bring To Front` feature allows you to bring an app to front if it's already running (To enable, make sure `Max Instances` is enabled).
+- `Background` feature allows you to launch an application in the background (Some applications may not support this feature).
 - Shows a :green_circle: indicator if the app is already running
 - Process Killer action allows killing all instances of an application
 - **STEAM SUPPORT**: New `Steam Game Launcher` action shows you a list of all Steam games installed and let's you launch them from the Stream Deck
