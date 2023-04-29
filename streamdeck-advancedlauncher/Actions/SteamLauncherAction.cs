@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 namespace AdvancedLauncher.Actions
 {
     [PluginActionId("com.barraider.steamlauncher")]
-    public class SteamLauncherAction : PluginBase
+    public class SteamLauncherAction : KeypadBase
     {
 
         public enum ImageFit
@@ -123,7 +123,7 @@ namespace AdvancedLauncher.Actions
 
             if (appInfo != null && titleParameters != null && settings.ShowAppName)
             {
-                await Connection.SetTitleAsync(Tools.SplitStringToFit(appInfo.Name, titleParameters));
+                await Connection.SetTitleAsync(appInfo.Name?.SplitToFitKey(titleParameters));
             }
         }
 
