@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 namespace AdvancedLauncher.Actions
 {
     [PluginActionId("com.barraider.msstorelauncher")]
-    public class UWPLauncherAction : PluginBase
+    public class UWPLauncherAction : KeypadBase
     {
         private class PluginSettings
         {

@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace AdvancedLauncher.Actions
 {
     [PluginActionId("com.barraider.advancedlauncher.processkiller")]
-    public class ProcessKillerAction : PluginBase
+    public class ProcessKillerAction : KeypadBase
     {
         private class PluginSettings
         {
