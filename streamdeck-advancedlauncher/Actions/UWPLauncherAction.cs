@@ -108,7 +108,7 @@ namespace AdvancedLauncher.Actions
 
             if (appInfo != null && titleParameters != null && settings.ShowAppName)
             {
-                await Connection.SetTitleAsync(Tools.SplitStringToFit(appInfo.Name, titleParameters));
+                await Connection.SetTitleAsync(appInfo.Name?.SplitToFitKey(titleParameters));
             }
         }
 
