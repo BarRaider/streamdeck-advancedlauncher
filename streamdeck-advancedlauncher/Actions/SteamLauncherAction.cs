@@ -167,7 +167,6 @@ namespace AdvancedLauncher.Actions
 
         private async void FetchAppInfo()
         {
-
             try
             {
                 // Cleanup
@@ -348,7 +347,7 @@ namespace AdvancedLauncher.Actions
                     }
                 }
             }
-            var apps = settings.Applications.OrderBy(a => a.Name).ToList();
+            var apps = settings.Applications.GroupBy(a => a.Id).Select(g => g.FirstOrDefault())?.OrderBy(a => a.Name).ToList();
             Logger.Instance.LogMessage(TracingLevel.INFO, $"{this.GetType()} Found {apps.Count} apps in {directories.Count} dirs");
             settings.Applications = apps;
         }
