@@ -3,6 +3,10 @@
 
 **Author's website and contact information:** [https://barraider.com](https://barraider.com)
 
+### New in v1.8
+- New `Run in Background` option allows to launch apps without a window (still experimental)
+- Optimized internal logic and reduced CPU usage
+
 ### New in v1.7
 - Updated Steam Game Launcher to work with new Steam file formats
 

@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 namespace AdvancedLauncher.Actions
 {
     [PluginActionId("com.barraider.msstorelauncher")]
-    public class UWPLauncherAction : PluginBase
+    public class UWPLauncherAction : KeypadBase
     {
         private class PluginSettings
         {
@@ -108,7 +108,7 @@ namespace AdvancedLauncher.Actions
 
             if (appInfo != null && titleParameters != null && settings.ShowAppName)
             {
-                await Connection.SetTitleAsync(Tools.SplitStringToFit(appInfo.Name, titleParameters));
+                await Connection.SetTitleAsync(appInfo.Name?.SplitToFitKey(titleParameters));
             }
         }
 

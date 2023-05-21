@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 namespace AdvancedLauncher.Actions
 {
     [PluginActionId("com.barraider.steamlauncher")]
-    public class SteamLauncherAction : PluginBase
+    public class SteamLauncherAction : KeypadBase
     {
 
         public enum ImageFit
@@ -123,7 +123,7 @@ namespace AdvancedLauncher.Actions
 
             if (appInfo != null && titleParameters != null && settings.ShowAppName)
             {
-                await Connection.SetTitleAsync(Tools.SplitStringToFit(appInfo.Name, titleParameters));
+                await Connection.SetTitleAsync(appInfo.Name?.SplitToFitKey(titleParameters));
             }
         }
 
@@ -167,7 +167,6 @@ namespace AdvancedLauncher.Actions
 
         private async void FetchAppInfo()
         {
-
             try
             {
                 // Cleanup
@@ -348,7 +347,7 @@ namespace AdvancedLauncher.Actions
                     }
                 }
             }
-            var apps = settings.Applications.OrderBy(a => a.Name).ToList();
+            var apps = settings.Applications.GroupBy(a => a.Id).Select(g => g.FirstOrDefault())?.OrderBy(a => a.Name).ToList();
             Logger.Instance.LogMessage(TracingLevel.INFO, $"{this.GetType()} Found {apps.Count} apps in {directories.Count} dirs");
             settings.Applications = apps;
         }

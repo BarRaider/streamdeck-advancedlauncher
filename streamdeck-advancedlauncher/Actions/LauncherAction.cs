@@ -1,4 +1,5 @@
-﻿using BarRaider.SdTools;
+﻿using AdvancedLauncher.Backend;
+using BarRaider.SdTools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -11,6 +12,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Storage;
+using Windows.Storage.Streams;
 
 namespace AdvancedLauncher.Actions
 {
@@ -22,13 +25,13 @@ namespace AdvancedLauncher.Actions
     //---------------------------------------------------
 
     [PluginActionId("com.barraider.advancedlauncher")]
-    public class LauncherAction : PluginBase
+    public class LauncherAction : KeypadBase
     {
         private const int MAX_INSTANCES = 1;
         private const int POST_KILL_LAUNCH_DELAY = 0;
         private class PluginSettings
         {
-            
+
             public static PluginSettings CreateDefaultSettings()
             {
                 PluginSettings instance = new PluginSettings
@@ -42,7 +45,8 @@ namespace AdvancedLauncher.Actions
                     PostKillLaunchDelay = POST_KILL_LAUNCH_DELAY.ToString(),
                     RunAsAdmin = false,
                     ShowRunningIndicator = false,
-                    BringToFront = false
+                    BringToFront = false,
+                    BackgroundRun = false
                 };
                 return instance;
             }
@@ -77,6 +81,10 @@ namespace AdvancedLauncher.Actions
 
             [JsonProperty(PropertyName = "bringToFront")]
             public bool BringToFront { get; set; }
+
+            [JsonProperty(PropertyName = "backgroundRun")]
+            public bool BackgroundRun { get; set; }
+            
         }
 
         #region Private Members
@@ -85,6 +93,7 @@ namespace AdvancedLauncher.Actions
         private readonly PluginSettings settings;
         private int maxInstances = 1;
         private Bitmap fileImage;
+        private bool fileImageHasLaunchedIndicator = false;
         private int postKillLaunchDelay = 0;
         private Image prefetchedAdminImage = null;
 
@@ -121,8 +130,8 @@ namespace AdvancedLauncher.Actions
         {
             if (fileImage != null)
             {
+                HandleRunningIndicator();
                 await Connection.SetImageAsync(fileImage);
-                await HandleRunningIndicator();
             }
         }
 
@@ -197,7 +206,7 @@ namespace AdvancedLauncher.Actions
                 }
 
                 FileInfo fileInfo = new FileInfo(settings.Application);
-                string fileName = fileInfo.Name.Substring(0,fileInfo.Name.LastIndexOf('.'));
+                string fileName = fileInfo.Name.Substring(0, fileInfo.Name.LastIndexOf('.'));
                 // Kill existing instances
                 if (settings.KillInstances)
                 {
@@ -254,9 +263,12 @@ namespace AdvancedLauncher.Actions
             }
             // Enter the executable to run, including the complete path
             start.FileName = settings.Application;
-            // Do you want to show a console window?
-            //start.WindowStyle = ProcessWindowStyle.Hidden;
-            //start.CreateNoWindow = true;
+
+            if (settings.BackgroundRun)
+            {
+                start.WindowStyle = ProcessWindowStyle.Hidden;
+                //start.CreateNoWindow = true;
+            }
 
             if (settings.RunAsAdmin)
             {
@@ -267,7 +279,7 @@ namespace AdvancedLauncher.Actions
             Process.Start(start);
         }
 
-        private async Task HandleRunningIndicator()
+        private void HandleRunningIndicator()
         {
             if (!settings.ShowRunningIndicator)
             {
@@ -278,13 +290,43 @@ namespace AdvancedLauncher.Actions
             string fileName = fileInfo.Name.Substring(0, fileInfo.Name.LastIndexOf('.'));
 
             // Check if there are any running instances
-            if (Process.GetProcessesByName(fileName).Length > 0)
+            if (ProcessesCache.Instance.GetProcessCountByProcessName(fileName) > 0)
             {
-                await Connection.SetTitleAsync($"🟢{new String(' ',10)}");
+                if (fileImageHasLaunchedIndicator) // No need to do anything as the indicator already exists
+                {
+                    return;
+                }
+                AddLaunchedIndicator();
             }
-            else
+            else if (fileImageHasLaunchedIndicator)
             {
-                await Connection.SetTitleAsync((String)null);
+                FetchFileImage();
+            }
+        }
+
+        private void AddLaunchedIndicator()
+        {
+            if (fileImage == null)
+            {
+                return;
+            }
+
+            try
+            {
+                Bitmap newImage = (Bitmap)fileImage.Clone();
+                
+                // Add Circle
+                Graphics graphics = Graphics.FromImage(newImage);
+                graphics.FillCircle(new SolidBrush(Color.FromArgb(0, 210, 106)), 30, 120, 12);
+
+                // Replace image
+                fileImage.Dispose();
+                fileImage = newImage;
+                fileImageHasLaunchedIndicator = true;
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.LogMessage(TracingLevel.ERROR, $"{this.GetType()} AddLaunchedIndicator Exception: {ex}");
             }
         }
 
@@ -296,6 +338,7 @@ namespace AdvancedLauncher.Actions
                 fileImage = null;
             }
 
+            fileImageHasLaunchedIndicator = false;
             // Try to extract Icon
             if (!String.IsNullOrEmpty(settings.Application) && File.Exists(settings.Application))
             {
