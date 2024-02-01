@@ -74,7 +74,7 @@ namespace AdvancedLauncher.Actions
         private readonly PluginSettings _settings;
         private TitleParameters _titleParameters;
         private Bitmap _appImage;
-        private SteamAppInfo _appInfo;
+        private EpicInstalledApplication _installedApp;
 
         #endregion
         public EpicLauncherAction(SDConnection connection, InitialPayload payload) : base(connection, payload)
@@ -126,9 +126,9 @@ namespace AdvancedLauncher.Actions
                 await Connection.SetImageAsync(_appImage);
             }
 
-            if (_appInfo != null && _titleParameters != null && _settings.ShowAppName)
+            if (_installedApp != null && _titleParameters != null && _settings.ShowAppName)
             {
-                await Connection.SetTitleAsync(_appInfo.Name?.SplitToFitKey(_titleParameters));
+                await Connection.SetTitleAsync(_installedApp.DisplayName?.SplitToFitKey(_titleParameters));
             }
         }
 
@@ -149,7 +149,7 @@ namespace AdvancedLauncher.Actions
 
         private void InitializeSettings()
         {
-            _appInfo = null;
+            _installedApp = null;
             if (!String.IsNullOrEmpty(_settings.ApplicationId))
             {
                 FetchAppInfo();
@@ -183,6 +183,7 @@ namespace AdvancedLauncher.Actions
 
                 var installedApp = _settings.Applications.FirstOrDefault(app => app.Id == _settings.ApplicationId);
                 if (installedApp == default) return;
+                _installedApp = installedApp;
 
                 _settings.ApplicationNamespace = installedApp.Namespace;
                 _settings.ApplicationName = installedApp.Name;
