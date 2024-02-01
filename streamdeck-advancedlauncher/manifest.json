@@ -59,6 +59,21 @@
       "Tooltip": "Launch Steam Games",
       "UUID": "com.barraider.steamlauncher",
       "PropertyInspectorPath": "PropertyInspector/SteamLauncher.html"
+    },
+    {
+      "Icon": "Images/epicIcon",
+      "Name": "Epic Game Launcher",
+      "States": [
+        {
+          "Image": "Images/epicAction",
+          "TitleAlignment": "bottom",
+          "FontSize": "10"
+        }
+      ],
+      "SupportedInMultiActions": true,
+      "Tooltip": "Launch Epic Games",
+      "UUID": "com.barraider.epiclauncher",
+      "PropertyInspectorPath": "PropertyInspector/EpicLauncher.html"
     }
   ],
   "Author": "BarRaider",
