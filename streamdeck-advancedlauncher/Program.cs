@@ -1,11 +1,12 @@
-﻿using BarRaider.SdTools;
+﻿using AdvancedLauncher.Backend;
+using BarRaider.SdTools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace streamdeck_smartlauncher
+namespace AdvancedLauncher
 {
     class Program
     {
@@ -14,7 +15,7 @@ namespace streamdeck_smartlauncher
             // Uncomment this line of code to allow for debugging
             //while (!System.Diagnostics.Debugger.IsAttached) { System.Threading.Thread.Sleep(100); }
 
-            SDWrapper.Run(args);
+            SDWrapper.Run(args, new UpdateHandler());
         }
     }
 }
