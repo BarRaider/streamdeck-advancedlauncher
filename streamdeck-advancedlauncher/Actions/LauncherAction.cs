@@ -29,6 +29,13 @@ namespace AdvancedLauncher.Actions
     {
         private const int MAX_INSTANCES = 1;
         private const int POST_KILL_LAUNCH_DELAY = 0;
+
+        public enum LongPressAction
+        {
+            Nothing = 0,
+            KillProcess = 1,
+        }
+
         private class PluginSettings
         {
 
@@ -46,7 +53,11 @@ namespace AdvancedLauncher.Actions
                     RunAsAdmin = false,
                     ShowRunningIndicator = false,
                     BringToFront = false,
-                    BackgroundRun = false
+                    BackgroundRun = false,
+                    ParseEnvironmentVariables = false,
+                    LongKeypressTime = DEFAULT_LONG_KEYPRESS_LENGTH_MS.ToString(),
+                    LongPressAction = LongPressAction.Nothing
+
                 };
                 return instance;
             }
@@ -84,11 +95,20 @@ namespace AdvancedLauncher.Actions
 
             [JsonProperty(PropertyName = "backgroundRun")]
             public bool BackgroundRun { get; set; }
-            
+
+            [JsonProperty(PropertyName = "envVars")]
+            public bool ParseEnvironmentVariables { get; set; }
+
+            [JsonProperty(PropertyName = "longKeypressTime")]
+            public string LongKeypressTime { get; set; }
+
+            [JsonProperty(PropertyName = "longPressAction")]
+            public LongPressAction LongPressAction { get; set; }            
         }
 
         #region Private Members
         private const string ADMIN_IMAGE_FILE = @"images\shield.png";
+        private const int DEFAULT_LONG_KEYPRESS_LENGTH_MS = 600;
 
         private readonly PluginSettings settings;
         private int maxInstances = 1;
@@ -96,6 +116,10 @@ namespace AdvancedLauncher.Actions
         private bool fileImageHasLaunchedIndicator = false;
         private int postKillLaunchDelay = 0;
         private Image prefetchedAdminImage = null;
+
+        private bool longKeyPressed = false;
+        private int longKeypressTime = DEFAULT_LONG_KEYPRESS_LENGTH_MS;
+        private readonly System.Timers.Timer tmrRunLongPress = new System.Timers.Timer();
 
         #endregion
         public LauncherAction(SDConnection connection, InitialPayload payload) : base(connection, payload)
@@ -109,22 +133,43 @@ namespace AdvancedLauncher.Actions
             {
                 this.settings = payload.Settings.ToObject<PluginSettings>();
             }
+            tmrRunLongPress.Interval = longKeypressTime;
+            tmrRunLongPress.Elapsed += TmrRunLongPress_Elapsed;
             InitializeSettings();
             OnTick();
         }
 
         public override void Dispose()
         {
+            tmrRunLongPress.Stop();
+            tmrRunLongPress.Elapsed -= TmrRunLongPress_Elapsed;
             Logger.Instance.LogMessage(TracingLevel.INFO, $"Destructor called");
         }
 
-        public async override void KeyPressed(KeyPayload payload)
+        private void TmrRunLongPress_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "Key Pressed");
-            await HandleApplicationRun();
+            LongKeyPress();
         }
 
-        public override void KeyReleased(KeyPayload payload) { }
+        public override void KeyPressed(KeyPayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"Key Pressed {this.GetType()}");
+            longKeyPressed = false;
+
+            tmrRunLongPress.Interval = longKeypressTime > 0 ? longKeypressTime : DEFAULT_LONG_KEYPRESS_LENGTH_MS;
+            tmrRunLongPress.Start();
+        }
+
+        public async override void KeyReleased(KeyPayload payload)
+        {
+            tmrRunLongPress.Stop();
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"Key Released {this.GetType()}");
+            if (!longKeyPressed) // Take care of the short keypress
+            {
+                Logger.Instance.LogMessage(TracingLevel.INFO, $"Short Keypress {this.GetType()}");
+                await HandleApplicationRun();
+            }
+        }
 
         public async override void OnTick()
         {
@@ -167,21 +212,37 @@ namespace AdvancedLauncher.Actions
             settings.AppStartIn = fileInfo.Directory.FullName;
         }
 
-        private void InitializeSettings()
+        private async void InitializeSettings()
         {
+            bool updateSettings = false;
             if (settings.KillInstances)
             {
                 settings.MaxInstances = "1";
+                updateSettings = true;
             }
 
             if (!Int32.TryParse(settings.MaxInstances, out maxInstances))
             {
                 settings.MaxInstances = MAX_INSTANCES.ToString();
+                updateSettings = true;
             }
 
             if (!Int32.TryParse(settings.PostKillLaunchDelay, out postKillLaunchDelay))
             {
                 settings.PostKillLaunchDelay = POST_KILL_LAUNCH_DELAY.ToString();
+                updateSettings = true;
+            }
+
+            if (!Int32.TryParse(settings.LongKeypressTime, out longKeypressTime))
+            {
+                settings.LongKeypressTime = DEFAULT_LONG_KEYPRESS_LENGTH_MS.ToString();
+                longKeypressTime = DEFAULT_LONG_KEYPRESS_LENGTH_MS;
+                updateSettings = true;
+            }
+
+            if (updateSettings)
+            {
+                await SaveSettings();
             }
 
             FetchFileImage();
@@ -253,16 +314,17 @@ namespace AdvancedLauncher.Actions
             // Enter in the command line arguments, everything you would enter after the executable name itself
             if (!String.IsNullOrEmpty(settings.AppArguments))
             {
-                start.Arguments = settings.AppArguments;
+                start.Arguments = settings.ParseEnvironmentVariables ? Environment.ExpandEnvironmentVariables(settings.AppArguments) : settings.AppArguments;
             }
 
             // Enter Working (Start In) Directory
-            if (Directory.Exists(settings.AppStartIn))
+            string workingDir = settings.ParseEnvironmentVariables ? Environment.ExpandEnvironmentVariables(settings.AppStartIn) : settings.AppStartIn;
+            if (Directory.Exists(workingDir))
             {
-                start.WorkingDirectory = settings.AppStartIn;
+                start.WorkingDirectory = workingDir;
             }
             // Enter the executable to run, including the complete path
-            start.FileName = settings.Application;
+            start.FileName = settings.ParseEnvironmentVariables ? Environment.ExpandEnvironmentVariables(settings.Application) : settings.Application;
 
             if (settings.BackgroundRun)
             {
@@ -314,7 +376,7 @@ namespace AdvancedLauncher.Actions
             try
             {
                 Bitmap newImage = (Bitmap)fileImage.Clone();
-                
+
                 // Add Circle
                 Graphics graphics = Graphics.FromImage(newImage);
                 graphics.FillCircle(new SolidBrush(Color.FromArgb(0, 210, 106)), 30, 120, 12);
@@ -434,6 +496,55 @@ namespace AdvancedLauncher.Actions
             }
 
             return prefetchedAdminImage;
+        }
+
+        private async Task KillApplication()
+        {
+            try
+            {
+                if (String.IsNullOrEmpty(settings.Application))
+                {
+                    Logger.Instance.LogMessage(TracingLevel.WARN, "KillApplication called, but no application configured");
+                    await Connection.ShowAlert();
+                    return;
+                }
+
+                if (!File.Exists(settings.Application))
+                {
+                    Logger.Instance.LogMessage(TracingLevel.WARN, $"KillApplication called, but file does not exist: {settings.Application}");
+                    await Connection.ShowAlert();
+                    return;
+                }
+
+                FileInfo fileInfo = new FileInfo(settings.Application);
+                string fileName = fileInfo.Name.Substring(0, fileInfo.Name.LastIndexOf('.'));
+                // Kill existing instances
+                Process.GetProcessesByName(fileName).ToList().ForEach(p =>
+                {
+                    Logger.Instance.LogMessage(TracingLevel.INFO, $"Killing process: {p.ProcessName} PID: {p.Id}");
+                    p.Kill();
+                });
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.LogMessage(TracingLevel.ERROR, $"KillApplication Exception for {settings.Application} {ex}");
+                await Connection.ShowAlert();
+            }
+        }
+
+        private async void LongKeyPress()
+        {
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"Long Keypress {this.GetType()}");
+            longKeyPressed = true;
+            if (settings.LongPressAction == LongPressAction.Nothing)
+            {
+                return;
+            }
+            else if (settings.LongPressAction == LongPressAction.KillProcess)
+            {
+                await KillApplication();
+                await Connection.ShowOk();
+            }
         }
 
 

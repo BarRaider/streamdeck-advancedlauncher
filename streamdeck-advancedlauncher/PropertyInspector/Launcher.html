@@ -6,8 +6,10 @@
     <meta name=apple-mobile-web-app-capable content=yes>
     <meta name=apple-mobile-web-app-status-bar-style content=black>
     <title>Advanced Launcher Settings</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/barraider/streamdeck-easypi@latest/src/sdpi.css">
-    <script src="https://cdn.jsdelivr.net/gh/barraider/streamdeck-easypi@latest/src/sdtools.common.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/barraider/streamdeck-easypi-v2@latest/src/sdpi.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/barraider/streamdeck-easypi-v2@latest/src/rangeTooltip.css">
+    <script src="https://cdn.jsdelivr.net/gh/barraider/streamdeck-easypi-v2@latest/src/sdtools.common.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/barraider/streamdeck-easypi-v2@latest/src/rangeTooltip.js"></script>
     <script src="Launcher.js"></script>
 </head>
 <body>
@@ -28,6 +30,14 @@
             <div class="sdpi-item-label">Arguments</div>
             <input class="sdpi-item-value sdProperty" placeholder="-settings -whatever" value="" id="appArguments" oninput="setSettings()">
         </div>
+        <div type="checkbox" class="sdpi-item" id="dvEnvVars">
+            <div class="sdpi-item-label empty">&nbsp;</div>
+            <div class="sdpi-item-value">
+                <input id="envVars" type="checkbox" value="" class="sdProperty sdCheckbox" oninput="setSettings()">
+                <label for="envVars" class="sdpi-item-label"><span></span>Parse Environment Variables</label>
+            </div>
+        </div>
+        <div class="sdpi-heading">LAUNCH SETTINGS</div>
         <div type="checkbox" class="sdpi-item" id="dvAdmin">
             <div class="sdpi-item-label">Admin</div>
             <div class="sdpi-item-value">
@@ -67,13 +77,6 @@
             <div class="sdpi-item-label">Delay before launch (seconds)</div>
             <input class="sdpi-item-value sdProperty" id="postKillLaunchDelay" inputmode="numeric" pattern="[0-9]*" type="number" placeholder="0" oninput="setSettings()">
         </div>
-        <div type="checkbox" class="sdpi-item" id="dvIndicator">
-            <div class="sdpi-item-label">Indicator</div>
-            <div class="sdpi-item-value">
-                <input id="showRunningIndicator" type="checkbox" value="" class="sdProperty sdCheckbox" oninput="setSettings()">
-                <label for="showRunningIndicator" class="sdpi-item-label"><span></span>Show dot if process is running</label>
-            </div>
-        </div>
         <div type="checkbox" class="sdpi-item" id="dvBackground">
             <div class="sdpi-item-label">Background</div>
             <div class="sdpi-item-value">
@@ -81,6 +84,34 @@
                 <label for="backgroundRun" class="sdpi-item-label"><span></span>Run in background (Experimental)</label>
             </div>
         </div>
+        <div class="sdpi-heading">MORE SETTINGS</div>
+        <div type="checkbox" class="sdpi-item" id="dvIndicator">
+            <div class="sdpi-item-label">Indicator</div>
+            <div class="sdpi-item-value">
+                <input id="showRunningIndicator" type="checkbox" value="" class="sdProperty sdCheckbox" oninput="setSettings()">
+                <label for="showRunningIndicator" class="sdpi-item-label"><span></span>Show dot if process is running</label>
+            </div>
+        </div>
+        <div class="sdpi-item" id="dvLongPress">
+            <div class="sdpi-item-label">Long Press</div>
+            <select class="sdpi-item-value select sdProperty" id="longPressAction" oninput="setSettings()" value="0">
+                <option value="0">- Do Nothing -</option>
+                <option value="1">Kill existing process</option>
+            </select>
+        </div>
+        <div type="range" class="sdpi-item sdShowTooltip" id="dvLongKeypressTime">
+            <div class="sdpi-item-label" id="longKeypressTimeTitle">Long Keypress Time</div>
+            <div class="sdpi-item-value">
+                <span class="clickable" value="150">150</span>
+                <input type="range" min="150" max="1000" value=600 list="numbers" data-suffix=" ms" class="sdProperty" id="longKeypressTime" oninput="setSettings()">
+                <span class="clickable" value="1000">1000</span>
+                <datalist id="numbers">
+                    <option>1000</option>
+                </datalist>
+                <label for="longKeypressTime" class="rangeLabel"></label>
+            </div>
+        </div>
+        <div class="sdpi-info-label hidden" style="top: -1000;" value="">Tooltip</div>
     </div>
 </body>
 </html>
