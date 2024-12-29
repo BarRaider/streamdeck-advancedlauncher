@@ -109,7 +109,6 @@
     <Compile Include="Backend\ProcessesCache.cs" />
     <Compile Include="Backend\SteamAppInfo.cs" />
     <Compile Include="Backend\SteamInstalledApplication.cs" />
-    <Compile Include="Backend\UpdateHandler.cs" />
     <Compile Include="Backend\UWPManager.cs" />
     <Compile Include="Backend\UWPPackageInfo.cs" />
     <Compile Include="IconExtraction\NativeMethods.cs" />
@@ -199,6 +198,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\DotNet\BRUtils\BRUtils.csproj">
+      <Project>{cee6e699-db1f-4034-9d20-25a8ddf154cd}</Project>
+      <Name>BRUtils</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
