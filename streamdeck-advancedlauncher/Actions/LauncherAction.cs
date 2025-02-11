@@ -56,7 +56,8 @@ namespace AdvancedLauncher.Actions
                     BackgroundRun = false,
                     ParseEnvironmentVariables = false,
                     LongKeypressTime = DEFAULT_LONG_KEYPRESS_LENGTH_MS.ToString(),
-                    LongPressAction = LongPressAction.Nothing
+                    LongPressAction = LongPressAction.Nothing,
+                    FixTinyIcons = false
 
                 };
                 return instance;
@@ -103,7 +104,11 @@ namespace AdvancedLauncher.Actions
             public string LongKeypressTime { get; set; }
 
             [JsonProperty(PropertyName = "longPressAction")]
-            public LongPressAction LongPressAction { get; set; }            
+            public LongPressAction LongPressAction { get; set; }
+
+            [JsonProperty(PropertyName = "fixTinyIcons")]
+            public bool FixTinyIcons { get; set; }
+            
         }
 
         #region Private Members
@@ -183,8 +188,9 @@ namespace AdvancedLauncher.Actions
         public async override void ReceivedSettings(ReceivedSettingsPayload payload)
         {
             string appOld = settings.Application;
+            bool fixTinyIconsOld = settings.FixTinyIcons;
             Tools.AutoPopulateSettings(settings, payload.Settings);
-            if (appOld != settings.Application) // Application has changed
+            if (appOld != settings.Application || fixTinyIconsOld != settings.FixTinyIcons) // Application has changed
             {
                 InitializeStartInDirectory();
             }
@@ -210,6 +216,7 @@ namespace AdvancedLauncher.Actions
             }
             FileInfo fileInfo = new FileInfo(settings.Application);
             settings.AppStartIn = fileInfo.Directory.FullName;
+            FetchFileImage();
         }
 
         private async void InitializeSettings()
@@ -405,39 +412,68 @@ namespace AdvancedLauncher.Actions
             if (!String.IsNullOrEmpty(settings.Application) && File.Exists(settings.Application))
             {
                 FileInfo fileInfo = new FileInfo(settings.Application);
-                var fileIcon = IconExtraction.Shell.OfPath(fileInfo.FullName, small: false);
-                if (fileIcon != null)
+                using (Bitmap fileIcon = GetBestFileIcon(fileInfo.FullName))
                 {
-                    using (Bitmap fileIconAsBitmap = fileIcon.ToBitmap())
+                    if (fileIcon == null)
                     {
-                        fileImage = Tools.GenerateGenericKeyImage(out Graphics graphics);
-
-                        // Check if app icon is smaller than the Stream Deck key
-                        if (fileIconAsBitmap.Width < fileImage.Width && fileIconAsBitmap.Height < fileImage.Height)
-                        {
-                            float position = Math.Min(fileIconAsBitmap.Width / 2, fileIconAsBitmap.Height / 2);
-                            graphics.DrawImage(fileIconAsBitmap, position, position, fileImage.Width - position * 2, fileImage.Height - position * 2);
-                        }
-                        else // App icon is bigger or equals to the size of a stream deck key
-                        {
-                            graphics.DrawImage(fileIconAsBitmap, 0, 0, fileImage.Width, fileImage.Height);
-                        }
-
-                        // Add shield image
-                        if (settings.RunAsAdmin)
-                        {
-                            var adminImage = GetAdminImage();
-                            if (adminImage != null)
-                            {
-                                graphics.DrawImage(adminImage, fileImage.Width - adminImage.Width, fileImage.Height - adminImage.Height, adminImage.Width, adminImage.Height);
-                            }
-                        }
-
-                        graphics.Dispose();
+                        return;
                     }
-                    fileIcon.Dispose();
+                    fileImage = Tools.GenerateGenericKeyImage(out Graphics graphics);
+
+                    // Check if app icon is smaller than the Stream Deck key
+                    if (fileIcon.Width < fileImage.Width && fileIcon.Height < fileImage.Height)
+                    {
+                        float position = Math.Min(fileIcon.Width / 2, fileIcon.Height / 2);
+                        graphics.DrawImage(fileIcon, position, position, fileImage.Width - position * 2, fileImage.Height - position * 2);
+                    }
+                    else // App icon is bigger or equals to the size of a stream deck key
+                    {
+                        graphics.DrawImage(fileIcon, 0, 0, fileImage.Width, fileImage.Height);
+                    }
+
+                    // Add shield image
+                    if (settings.RunAsAdmin)
+                    {
+                        var adminImage = GetAdminImage();
+                        if (adminImage != null)
+                        {
+                            graphics.DrawImage(adminImage, fileImage.Width - adminImage.Width, fileImage.Height - adminImage.Height, adminImage.Width, adminImage.Height);
+                        }
+                    }
+
+                    graphics.Dispose();
                 }
             }
+        }
+
+        private Bitmap GetBestFileIcon(string fileName)
+        {
+            try
+            {
+                if (!settings.FixTinyIcons)
+                {
+                    Bitmap img = null;
+                    try
+                    {
+                        img = IconExtraction.ThumbnailProvider.GetThumbnail(fileName, options: IconExtraction.ThumbnailOptions.IconOnly);
+                        if (img != null)
+                        {
+                            return img;
+                        }
+                    }
+                    catch { }
+                }
+                using Icon icon = IconExtraction.Shell.OfPath(fileName, small: false);
+                if (icon != null)
+                {
+                    return icon.ToBitmap();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.LogMessage(TracingLevel.ERROR, $"{this.GetType()} GetBestFileIcon Exception: {ex}");
+            }
+            return null;
         }
 
         [DllImport("user32.dll")]
