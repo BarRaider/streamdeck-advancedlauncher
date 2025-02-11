@@ -73,8 +73,8 @@
     <Reference Include="NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\..\..\DotNet\StreamDeck\packages\NLog.5.3.4\lib\net46\NLog.dll</HintPath>
     </Reference>
-    <Reference Include="StreamDeckTools, Version=6.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\DotNet\StreamDeck\packages\StreamDeck-Tools.6.2.0\lib\netstandard2.0\StreamDeckTools.dll</HintPath>
+    <Reference Include="StreamDeckTools, Version=6.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\..\DotNet\StreamDeck\packages\StreamDeck-Tools.6.3.0\lib\netstandard2.0\StreamDeckTools.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -115,6 +115,7 @@
     <Compile Include="IconExtraction\Shell.cs" />
     <Compile Include="Actions\ProcessKillerAction.cs" />
     <Compile Include="Actions\LauncherAction.cs" />
+    <Compile Include="IconExtraction\ThumbnailProvider.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShowWindowEnum.cs" />
