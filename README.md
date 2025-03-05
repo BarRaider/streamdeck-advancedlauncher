@@ -3,6 +3,9 @@
 
 **Author's website and contact information:** [https://barraider.com](https://barraider.com)
 
+### New in v2.0
+- Improved icons support - Program icons are now with higher resolution when available
+
 ### New in v1.8
 - New `Run in Background` option allows to launch apps without a window (still experimental)
 - Optimized internal logic and reduced CPU usage
