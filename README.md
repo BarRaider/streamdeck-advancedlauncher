@@ -6,6 +6,10 @@
 ### New in v2.0
 - Improved icons support - Program icons are now with higher resolution when available
 
+### New in v1.9
+- Environment Variables support! You can now use Environment Variables in the Arguments and Start In fields
+- Long Press support - You can now kill the existing process by Long Pressing the key
+
 ### New in v1.8
 - New `Run in Background` option allows to launch apps without a window (still experimental)
 - Optimized internal logic and reduced CPU usage
@@ -38,6 +42,15 @@ Please contact the developer. Contact information is available at https://barrai
 ## Dependencies
 * Uses StreamDeck-Tools by BarRaider: [![NuGet](https://img.shields.io/nuget/v/streamdeck-tools.svg?style=flat)](https://www.nuget.org/packages/streamdeck-tools)
 * Uses [Easy-PI](https://github.com/BarRaider/streamdeck-easypi) by BarRaider - Provides seamless integration with the Stream Deck PI (Property Inspector) 
+
+## Change Log
+
+### New in v1.8
+- New `Run in Background` option allows to launch apps without a window (still experimental)
+- Optimized internal logic and reduced CPU usage
+
+### New in v1.7
+- Updated Steam Game Launcher to work with new Steam file formats
 
 
 
