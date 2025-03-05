@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AdvancedLauncher
+namespace AdvancedLauncher.Backend
 {
     public enum ShowWindowEnum : int
     {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -100,6 +101,45 @@ namespace AdvancedLauncher.IconExtraction
             {
                 return clone;
             }
+            return clone;
+        }
+
+
+
+
+        ///<summary>
+        /// Get the jumbo assigned icon of the given path
+        ///</summary>
+        ///<param name="filepath">physical path</param>
+        ///<param name="checkdisk">bool fileicon</param>
+        ///<param name="overlay">bool symlink overlay</param>
+        ///<returns>Icon</returns>
+        public static Icon JumboOfPath(string filepath, bool checkdisk = true, bool overlay = false)
+        {
+            // Todo: Does not work properly if exe doesn't have a JumboIcon. Moved to ThumbnailProvider instead.
+
+            Icon clone;
+            SHGFI_Flag flags;
+            SHFILEINFO shinfo = new SHFILEINFO();
+            flags = SHGFI_Flag.SHGFI_SYSICONINDEX | SHGFI_Flag.SHGFI_LARGEICON | SHGFI_Flag.SHGFI_USEFILEATTRIBUTES;
+
+            if (SHGetFileInfo(filepath, 0, ref shinfo, Marshal.SizeOf(shinfo), flags) == 0)
+            {
+                throw (new FileNotFoundException());
+            }
+
+            IImageList spiml = null;
+            Guid guil = new Guid(IID_IImageList2);//or IID_IImageList
+
+            SHGetImageList(SHIL_JUMBO, ref guil, ref spiml);
+            IntPtr hJumboIcon = IntPtr.Zero;
+            spiml.GetIcon(shinfo.iIcon, ILD_TRANSPARENT | ILD_IMAGE | ILD_SCALE, ref hJumboIcon); //
+
+            Icon tmp = Icon.FromHandle(hJumboIcon);
+            clone = (Icon)tmp.Clone();
+            tmp.Dispose();
+            DestroyIcon(shinfo.hIcon);
+            DestroyIcon(hJumboIcon);
             return clone;
         }
         #endregion

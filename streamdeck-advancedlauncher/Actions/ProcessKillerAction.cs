@@ -35,7 +35,6 @@ namespace AdvancedLauncher.Actions
         #region Private Members
 
         private readonly PluginSettings settings;
-        private Icon fileIcon;
         private Bitmap fileImage;
 
         #endregion
@@ -94,11 +93,6 @@ namespace AdvancedLauncher.Actions
         private void InitializeSettings()
         {
             // Cleanup
-            if (fileIcon != null)
-            {
-                fileIcon.Dispose();
-                fileIcon = null;
-            }
             if (fileImage != null)
             {
                 fileImage.Dispose();
@@ -109,12 +103,7 @@ namespace AdvancedLauncher.Actions
             if (!String.IsNullOrEmpty(settings.Application) && File.Exists(settings.Application))
             {
                 FileInfo fileInfo = new FileInfo(settings.Application);
-                fileIcon = IconExtraction.Shell.OfPath(fileInfo.FullName, small: false);
-                if (fileIcon != null)
-                {
-                    // Get a bitmap image of the icon
-                    fileImage = fileIcon.ToBitmap();
-                }
+                fileImage = GetBestFileIcon(fileInfo.FullName);
             }
         }
 
@@ -150,6 +139,33 @@ namespace AdvancedLauncher.Actions
                 Logger.Instance.LogMessage(TracingLevel.ERROR, $"KillApplication Exception for {settings.Application} {ex}");
                 await Connection.ShowAlert();
             }
+        }
+
+        private Bitmap GetBestFileIcon(string fileName)
+        {
+            try
+            {
+                Bitmap img = null;
+                try
+                {
+                    img = IconExtraction.ThumbnailProvider.GetThumbnail(fileName, options: IconExtraction.ThumbnailOptions.IconOnly);
+                    if (img != null)
+                    {
+                        return img;
+                    }
+                }
+                catch { }
+                using Icon icon = IconExtraction.Shell.OfPath(fileName, small: false);
+                if (icon != null)
+                {
+                    return icon.ToBitmap();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.LogMessage(TracingLevel.ERROR, $"{this.GetType()} GetBestFileIcon Exception: {ex}");
+            }
+            return null;
         }
 
         #endregion

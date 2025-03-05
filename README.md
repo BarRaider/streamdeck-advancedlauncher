@@ -3,9 +3,19 @@
 
 **Author's website and contact information:** [https://barraider.com](https://barraider.com)
 
+### New in v2.0
+- Improved icons support - Program icons are now with higher resolution when available
+
 ### New in v1.9
 - Environment Variables support! You can now use Environment Variables in the Arguments and Start In fields
 - Long Press support - You can now kill the existing process by Long Pressing the key
+
+### New in v1.8
+- New `Run in Background` option allows to launch apps without a window (still experimental)
+- Optimized internal logic and reduced CPU usage
+
+### New in v1.7
+- Updated Steam Game Launcher to work with new Steam file formats
 
 ## Current Features
 - New `Start In` parameter, allows you to modify the working directory in which the application runs. 
